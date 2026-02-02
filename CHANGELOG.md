@@ -10,3 +10,4 @@ The format is based on Keep a Changelog and this project adheres to Semantic Ver
 - Added health endpoint and correlation ID middleware.
 - Added version and status endpoints.
 - Added Swagger OpenAPI docs at /docs and /docs-json.
+- Added Getting Started environment setup instructions.

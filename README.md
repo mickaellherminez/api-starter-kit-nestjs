@@ -13,6 +13,14 @@ Production‑ready NestJS API starter with auth, RBAC, observability, Prisma, an
 npm install
 ```
 
+## Environment
+
+Create a `.env` file (see `.env.example`):
+
+```bash
+cp .env.example .env
+```
+
 ## Run
 
 ```bash
