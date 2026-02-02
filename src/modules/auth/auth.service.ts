@@ -1,5 +1,6 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import type { StringValue } from 'ms';
 import * as argon2 from 'argon2';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
@@ -35,13 +36,13 @@ export class AuthService {
 
   private signAccessToken(userId: string, email: string) {
     const secret = process.env.JWT_ACCESS_SECRET ?? 'dev-access-secret';
-    const expiresIn = process.env.JWT_ACCESS_EXPIRES_IN ?? '15m';
+    const expiresIn = (process.env.JWT_ACCESS_EXPIRES_IN ?? '15m') as StringValue;
     return this.jwt.signAsync({ sub: userId, email }, { secret, expiresIn });
   }
 
   private signRefreshToken(userId: string, email: string) {
     const secret = process.env.JWT_REFRESH_SECRET ?? 'dev-refresh-secret';
-    const expiresIn = process.env.JWT_REFRESH_EXPIRES_IN ?? '7d';
+    const expiresIn = (process.env.JWT_REFRESH_EXPIRES_IN ?? '7d') as StringValue;
     return this.jwt.signAsync({ sub: userId, email }, { secret, expiresIn });
   }
 }
