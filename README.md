@@ -1,5 +1,9 @@
 # API Starter Kit (NestJS)
 
+![GitHub last commit](https://img.shields.io/github/last-commit/mickaellherminez/api-starter-kit-nestjs?style=flat-square)
+![GitHub issues](https://img.shields.io/github/issues/mickaellherminez/api-starter-kit-nestjs?style=flat-square)
+![GitHub stars](https://img.shields.io/github/stars/mickaellherminez/api-starter-kit-nestjs?style=flat-square)
+
 Production‑ready NestJS API starter with auth, RBAC, observability, Prisma, and tests.
 
 ## Requirements
