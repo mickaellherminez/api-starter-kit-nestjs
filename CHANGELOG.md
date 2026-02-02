@@ -6,9 +6,13 @@ The format is based on Keep a Changelog and this project adheres to Semantic Ver
 
 ## [Unreleased]
 
+## [0.0.1] - 2026-02-02
+
 - Initial NestJS scaffold (CLI) added.
 - Added health endpoint and correlation ID middleware.
 - Added version and status endpoints.
 - Added Swagger OpenAPI docs at /docs and /docs-json.
 - Added Getting Started environment setup instructions.
 - Added example curl requests in README.
+
+[0.0.1]: https://github.com/mickaellherminez/api-starter-kit-nestjs/releases/tag/0.0.1
