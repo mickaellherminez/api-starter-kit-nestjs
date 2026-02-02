@@ -11,3 +11,4 @@ The format is based on Keep a Changelog and this project adheres to Semantic Ver
 - Added version and status endpoints.
 - Added Swagger OpenAPI docs at /docs and /docs-json.
 - Added Getting Started environment setup instructions.
+- Added example curl requests in README.

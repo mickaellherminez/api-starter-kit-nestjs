@@ -40,6 +40,19 @@ npm run start:prod
 - Swagger UI: `/docs`
 - OpenAPI JSON: `/docs-json`
 
+## Example Requests
+
+```bash
+# health
+curl -i http://localhost:3000/v1/health
+
+# version
+curl -i http://localhost:3000/v1/version
+
+# status
+curl -i http://localhost:3000/v1/status
+```
+
 ## Tests
 
 ```bash
