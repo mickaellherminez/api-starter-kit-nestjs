@@ -1,0 +1,6 @@
+# BMAD generated outputs
+_bmad-output/
+
+# Editor/OS
+.cursor/
+.DS_Store
