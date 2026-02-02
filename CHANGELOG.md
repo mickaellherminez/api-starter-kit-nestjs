@@ -9,3 +9,4 @@ The format is based on Keep a Changelog and this project adheres to Semantic Ver
 - Initial NestJS scaffold (CLI) added.
 - Added health endpoint and correlation ID middleware.
 - Added version and status endpoints.
+- Added Swagger OpenAPI docs at /docs and /docs-json.
