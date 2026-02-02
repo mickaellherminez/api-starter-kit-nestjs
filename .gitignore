@@ -4,3 +4,7 @@ _bmad-output/
 # Editor/OS
 .cursor/
 .DS_Store
+
+# Node
+node_modules/
+.env
