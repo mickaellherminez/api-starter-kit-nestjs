@@ -25,6 +25,14 @@ Create a `.env` file (see `.env.example`):
 cp .env.example .env
 ```
 
+The app loads `.env` at startup via `dotenv`.
+
+## Docker (PostgreSQL)
+
+```bash
+docker compose up -d
+```
+
 ## Run
 
 ```bash
