@@ -14,7 +14,7 @@ type RefreshTokenPayload = {
 };
 
 type OAuthProfile = {
-  provider: 'google';
+  provider: 'google' | 'github';
   providerId: string;
   email: string;
 };
@@ -99,6 +99,7 @@ export class AuthService {
         data: {
           email,
           googleId: provider === 'google' ? providerId : null,
+          githubId: provider === 'github' ? providerId : null,
           passwordHash: null,
         },
       });
@@ -174,6 +175,11 @@ export class AuthService {
         where: { googleId: providerId },
       });
     }
+    if (provider === 'github') {
+      return this.prisma.user.findUnique({
+        where: { githubId: providerId },
+      });
+    }
     return Promise.resolve(null);
   }
 
@@ -182,6 +188,12 @@ export class AuthService {
       return this.prisma.user.update({
         where: { id: userId },
         data: { googleId: providerId },
+      });
+    }
+    if (provider === 'github') {
+      return this.prisma.user.update({
+        where: { id: userId },
+        data: { githubId: providerId },
       });
     }
     return Promise.resolve(null);

@@ -128,4 +128,39 @@ export class AuthController {
     const redirectUrl = `${redirectBase}/oauth/callback#access_token=${encodeURIComponent(accessToken)}`;
     return res.redirect(redirectUrl);
   }
+
+  @Get('github')
+  @UseGuards(AuthGuard('github'))
+  githubAuth() {
+    return;
+  }
+
+  @Get('github/callback')
+  @UseGuards(AuthGuard('github'))
+  async githubCallback(
+    @Request() req: ExpressRequest & { user?: { provider: 'github'; providerId: string; email: string } },
+    @Res() res: Response,
+  ) {
+    if (!req.user) {
+      throw new UnauthorizedException('Unauthorized');
+    }
+
+    const { accessToken, refreshToken } = await this.authService.loginWithOAuth({
+      provider: req.user.provider,
+      providerId: req.user.providerId,
+      email: req.user.email,
+    });
+
+    const cookieName = process.env.AUTH_REFRESH_COOKIE_NAME ?? 'refresh_token';
+    res.cookie(cookieName, refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/v1/auth',
+    });
+
+    const redirectBase = process.env.FRONTEND_URL ?? 'http://localhost:5173';
+    const redirectUrl = `${redirectBase}/oauth/callback#access_token=${encodeURIComponent(accessToken)}`;
+    return res.redirect(redirectUrl);
+  }
 }

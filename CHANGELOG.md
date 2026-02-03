@@ -12,6 +12,7 @@ The format is based on Keep a Changelog and this project adheres to Semantic Ver
 - Added logout endpoint (POST /v1/auth/logout).
 - Added current user endpoint (GET /v1/auth/me).
 - Added Google OAuth endpoints (GET /v1/auth/google, /v1/auth/google/callback).
+- Added GitHub OAuth endpoints (GET /v1/auth/github, /v1/auth/github/callback).
 - Added Prisma setup (schema, client, and service).
 - Added dotenv loading for local environment variables.
 

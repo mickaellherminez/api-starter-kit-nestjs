@@ -102,6 +102,9 @@ curl -i http://localhost:3000/v1/auth/me \
 
 # google oauth (start)
 open "http://localhost:3000/v1/auth/google"
+
+# github oauth (start)
+open "http://localhost:3000/v1/auth/github"
 ```
 
 ## Auth
@@ -216,6 +219,31 @@ Response:
 
 3) Start flow:
 - Open `GET /v1/auth/google` in the browser.
+
+4) Callback behavior:
+- Backend sets HttpOnly refresh token cookie (`AUTH_REFRESH_COOKIE_NAME`).
+- Backend redirects to: `{FRONTEND_URL}/oauth/callback#access_token=...`
+
+5) Frontend should:
+- Read `access_token` from the URL hash.
+- Use it as `Authorization: Bearer <token>` for API calls.
+
+### GitHub OAuth (starter flow)
+
+1) Set env vars in `.env`:
+- `FRONTEND_URL` (ex: `http://localhost:5173`)
+- `GITHUB_CLIENT_ID`
+- `GITHUB_CLIENT_SECRET`
+- `GITHUB_CALLBACK_URL` (ex: `http://localhost:3000/v1/auth/github/callback`)
+
+2) Create GitHub OAuth credentials:
+- Go to GitHub → Settings → Developer settings → OAuth Apps → New OAuth App.
+- Homepage URL: `http://localhost:5173` (or your frontend URL).
+- Authorization callback URL: `http://localhost:3000/v1/auth/github/callback`
+- Copy Client ID and Client Secret into `.env`.
+
+3) Start flow:
+- Open `GET /v1/auth/github` in the browser.
 
 4) Callback behavior:
 - Backend sets HttpOnly refresh token cookie (`AUTH_REFRESH_COOKIE_NAME`).
