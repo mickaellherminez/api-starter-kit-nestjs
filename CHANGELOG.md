@@ -6,6 +6,8 @@ The format is based on Keep a Changelog and this project adheres to Semantic Ver
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-02-03
+
 - Added user registration endpoint (POST /v1/auth/register).
 - Added user login endpoint (POST /v1/auth/login).
 - Added refresh token rotation (POST /v1/auth/refresh).
@@ -26,3 +28,4 @@ The format is based on Keep a Changelog and this project adheres to Semantic Ver
 - Added example curl requests in README.
 
 [0.0.1]: https://github.com/mickaellherminez/api-starter-kit-nestjs/releases/tag/0.0.1
+[0.1.0]: https://github.com/mickaellherminez/api-starter-kit-nestjs/releases/tag/0.1.0
