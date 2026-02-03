@@ -1,6 +1,6 @@
 {
   "name": "api-starter-kit",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Production-ready NestJS API starter with auth, RBAC, observability, Prisma, and tests.",
   "author": "mickaellherminez",
   "private": true,
