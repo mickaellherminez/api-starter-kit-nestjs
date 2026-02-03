@@ -85,6 +85,11 @@ curl -i -X POST http://localhost:3000/v1/auth/register \
 curl -i -X POST http://localhost:3000/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"user@example.com","password":"changeme"}'
+
+# auth refresh
+curl -i -X POST http://localhost:3000/v1/auth/refresh \
+  -H "Content-Type: application/json" \
+  -d '{"refreshToken":"your-refresh-token"}'
 ```
 
 ## Auth
@@ -127,6 +132,51 @@ Response:
   "accessToken": "jwt-access-token",
   "refreshToken": "jwt-refresh-token"
 }
+```
+
+### Refresh
+
+Request:
+
+```json
+{
+  "refreshToken": "jwt-refresh-token"
+}
+```
+
+Response:
+
+```json
+{
+  "accessToken": "new-jwt-access-token",
+  "refreshToken": "new-jwt-refresh-token"
+}
+```
+
+### Refresh rotation test (manual)
+
+1) Create a user (get tokens):
+
+```bash
+curl -i -X POST http://localhost:3000/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"user@example.com","password":"changeme"}'
+```
+
+2) Refresh with the received refresh token:
+
+```bash
+curl -i -X POST http://localhost:3000/v1/auth/refresh \
+  -H "Content-Type: application/json" \
+  -d '{"refreshToken":"<REFRESH_TOKEN_RECU>"}'
+```
+
+3) Retry with the old refresh token (should be rejected):
+
+```bash
+curl -i -X POST http://localhost:3000/v1/auth/refresh \
+  -H "Content-Type: application/json" \
+  -d '{"refreshToken":"<ANCIEN_REFRESH_TOKEN>"}'
 ```
 
 ## Tests
