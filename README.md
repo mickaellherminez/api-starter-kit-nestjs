@@ -95,6 +95,10 @@ curl -i -X POST http://localhost:3000/v1/auth/refresh \
 curl -i -X POST http://localhost:3000/v1/auth/logout \
   -H "Content-Type: application/json" \
   -d '{"refreshToken":"your-refresh-token"}'
+
+# auth me
+curl -i http://localhost:3000/v1/auth/me \
+  -H "Authorization: Bearer <ACCESS_TOKEN>"
 ```
 
 ## Auth
@@ -173,6 +177,17 @@ Response:
 ```json
 {
   "success": true
+}
+```
+
+### Me
+
+Response:
+
+```json
+{
+  "id": "user-id",
+  "email": "user@example.com"
 }
 ```
 
