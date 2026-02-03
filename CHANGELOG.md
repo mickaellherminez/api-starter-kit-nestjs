@@ -7,6 +7,7 @@ The format is based on Keep a Changelog and this project adheres to Semantic Ver
 ## [Unreleased]
 
 - Added user registration endpoint (POST /v1/auth/register).
+- Added user login endpoint (POST /v1/auth/login).
 - Added Prisma setup (schema, client, and service).
 - Added dotenv loading for local environment variables.
 

@@ -33,6 +33,18 @@ The app loads `.env` at startup via `dotenv`.
 docker compose up -d
 ```
 
+## Prisma / Migrations
+
+If you see `The table public.User does not exist`, apply the schema to your DB:
+
+```bash
+# dev with migrations
+npx prisma migrate dev --name init
+
+# or push schema without migrations
+npx prisma db push
+```
+
 ## Run
 
 ```bash
@@ -46,7 +58,7 @@ npm run start:dev
 npm run start:prod
 ```
 
-## Health & Docs (planned)
+## Health & Docs
 
 - Health: `GET /v1/health`
 - Swagger UI: `/docs`
@@ -63,6 +75,58 @@ curl -i http://localhost:3000/v1/version
 
 # status
 curl -i http://localhost:3000/v1/status
+
+# auth register
+curl -i -X POST http://localhost:3000/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"user@example.com","password":"changeme"}'
+
+# auth login
+curl -i -X POST http://localhost:3000/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"user@example.com","password":"changeme"}'
+```
+
+## Auth
+
+### Register
+
+Request:
+
+```json
+{
+  "email": "user@example.com",
+  "password": "changeme"
+}
+```
+
+Response:
+
+```json
+{
+  "accessToken": "jwt-access-token",
+  "refreshToken": "jwt-refresh-token"
+}
+```
+
+### Login
+
+Request:
+
+```json
+{
+  "email": "user@example.com",
+  "password": "changeme"
+}
+```
+
+Response:
+
+```json
+{
+  "accessToken": "jwt-access-token",
+  "refreshToken": "jwt-refresh-token"
+}
 ```
 
 ## Tests

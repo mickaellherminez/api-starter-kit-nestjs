@@ -1,8 +1,9 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import type { StringValue } from 'ms';
 import * as argon2 from 'argon2';
 import { PrismaService } from '../../prisma/prisma.service';
+import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 
 @Injectable()
@@ -27,6 +28,25 @@ export class AuthService {
         passwordHash,
       },
     });
+
+    const accessToken = await this.signAccessToken(user.id, user.email);
+    const refreshToken = await this.signRefreshToken(user.id, user.email);
+
+    return { accessToken, refreshToken };
+  }
+
+  async login(dto: LoginDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const isValid = await argon2.verify(user.passwordHash, dto.password);
+    if (!isValid) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
 
     const accessToken = await this.signAccessToken(user.id, user.email);
     const refreshToken = await this.signRefreshToken(user.id, user.email);
