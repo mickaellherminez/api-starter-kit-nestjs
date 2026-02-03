@@ -99,6 +99,9 @@ curl -i -X POST http://localhost:3000/v1/auth/logout \
 # auth me
 curl -i http://localhost:3000/v1/auth/me \
   -H "Authorization: Bearer <ACCESS_TOKEN>"
+
+# google oauth (start)
+open "http://localhost:3000/v1/auth/google"
 ```
 
 ## Auth
@@ -153,6 +156,9 @@ Request:
 }
 ```
 
+Note: if you use the OAuth flow, the refresh token is stored in an HttpOnly cookie.
+In that case you can call `/v1/auth/refresh` without a body (browser must send cookies).
+
 Response:
 
 ```json
@@ -172,6 +178,8 @@ Request:
 }
 ```
 
+Note: same as refresh, you can omit the body if the refresh token is in the HttpOnly cookie.
+
 Response:
 
 ```json
@@ -190,6 +198,32 @@ Response:
   "email": "user@example.com"
 }
 ```
+
+### Google OAuth (starter flow)
+
+1) Set env vars in `.env`:
+- `FRONTEND_URL` (ex: `http://localhost:5173`)
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
+- `GOOGLE_CALLBACK_URL` (ex: `http://localhost:3000/v1/auth/google/callback`)
+
+2) Create Google OAuth credentials:
+- Go to Google Cloud Console and create/select a project.
+- Configure OAuth consent screen.
+- Create OAuth client ID (type: Web application).
+- Authorized redirect URI: `http://localhost:3000/v1/auth/google/callback`
+- Copy Client ID and Client Secret into `.env`.
+
+3) Start flow:
+- Open `GET /v1/auth/google` in the browser.
+
+4) Callback behavior:
+- Backend sets HttpOnly refresh token cookie (`AUTH_REFRESH_COOKIE_NAME`).
+- Backend redirects to: `{FRONTEND_URL}/oauth/callback#access_token=...`
+
+5) Frontend should:
+- Read `access_token` from the URL hash.
+- Use it as `Authorization: Bearer <token>` for API calls.
 
 ### Refresh rotation test (manual)
 

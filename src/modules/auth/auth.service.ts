@@ -13,6 +13,12 @@ type RefreshTokenPayload = {
   jti: string;
 };
 
+type OAuthProfile = {
+  provider: 'google';
+  providerId: string;
+  email: string;
+};
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -43,7 +49,7 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
-    if (!user) {
+    if (!user || !user.passwordHash) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -69,6 +75,36 @@ export class AuthService {
         : await this.getUserEmail(tokenPayload.sub);
 
     return this.issueTokens(tokenPayload.sub, email);
+  }
+
+  async loginWithOAuth(profile: OAuthProfile) {
+    const { provider, providerId, email } = profile;
+    if (!email) {
+      throw new UnauthorizedException('OAuth profile missing email');
+    }
+    let user = await this.findUserByProvider(provider, providerId);
+
+    if (!user) {
+      user = await this.prisma.user.findUnique({
+        where: { email },
+      });
+
+      if (user) {
+        user = await this.linkProvider(user.id, provider, providerId);
+      }
+    }
+
+    if (!user) {
+      user = await this.prisma.user.create({
+        data: {
+          email,
+          googleId: provider === 'google' ? providerId : null,
+          passwordHash: null,
+        },
+      });
+    }
+
+    return this.issueTokens(user.id, user.email);
   }
 
   async logout(refreshToken: string) {
@@ -130,6 +166,25 @@ export class AuthService {
       throw new UnauthorizedException('Invalid refresh token');
     }
     return user.email;
+  }
+
+  private findUserByProvider(provider: OAuthProfile['provider'], providerId: string) {
+    if (provider === 'google') {
+      return this.prisma.user.findUnique({
+        where: { googleId: providerId },
+      });
+    }
+    return Promise.resolve(null);
+  }
+
+  private linkProvider(userId: string, provider: OAuthProfile['provider'], providerId: string) {
+    if (provider === 'google') {
+      return this.prisma.user.update({
+        where: { id: userId },
+        data: { googleId: providerId },
+      });
+    }
+    return Promise.resolve(null);
   }
 
   private async validateRefreshToken(refreshToken: string) {

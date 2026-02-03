@@ -4,6 +4,7 @@ import {
   Get,
   Post,
   Request,
+  Res,
   UnauthorizedException,
   UseGuards,
   UsePipes,
@@ -15,7 +16,9 @@ import { LogoutDto } from './dto/logout.dto';
 import { RefreshDto } from './dto/refresh.dto';
 import { RegisterDto } from './dto/register.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { AuthGuard } from '@nestjs/passport';
 import type { Request as ExpressRequest } from 'express';
+import type { Response } from 'express';
 
 @Controller('v1/auth')
 export class AuthController {
@@ -50,8 +53,15 @@ export class AuthController {
       forbidNonWhitelisted: true,
     }),
   )
-  refresh(@Body() dto: RefreshDto) {
-    return this.authService.refresh(dto.refreshToken);
+  refresh(@Body() dto: RefreshDto, @Request() req: ExpressRequest & { cookies?: Record<string, string> }) {
+    const cookieName = process.env.AUTH_REFRESH_COOKIE_NAME ?? 'refresh_token';
+    const token = dto.refreshToken ?? req.cookies?.[cookieName];
+
+    if (!token) {
+      throw new UnauthorizedException('Unauthorized');
+    }
+
+    return this.authService.refresh(token);
   }
 
   @Post('logout')
@@ -61,8 +71,15 @@ export class AuthController {
       forbidNonWhitelisted: true,
     }),
   )
-  logout(@Body() dto: LogoutDto) {
-    return this.authService.logout(dto.refreshToken);
+  logout(@Body() dto: LogoutDto, @Request() req: ExpressRequest & { cookies?: Record<string, string> }) {
+    const cookieName = process.env.AUTH_REFRESH_COOKIE_NAME ?? 'refresh_token';
+    const token = dto.refreshToken ?? req.cookies?.[cookieName];
+
+    if (!token) {
+      throw new UnauthorizedException('Unauthorized');
+    }
+
+    return this.authService.logout(token);
   }
 
   @Get('me')
@@ -75,5 +92,40 @@ export class AuthController {
       id: req.user.userId,
       email: req.user.email,
     };
+  }
+
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  googleAuth() {
+    return;
+  }
+
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  async googleCallback(
+    @Request() req: ExpressRequest & { user?: { provider: 'google'; providerId: string; email: string } },
+    @Res() res: Response,
+  ) {
+    if (!req.user) {
+      throw new UnauthorizedException('Unauthorized');
+    }
+
+    const { accessToken, refreshToken } = await this.authService.loginWithOAuth({
+      provider: req.user.provider,
+      providerId: req.user.providerId,
+      email: req.user.email,
+    });
+
+    const cookieName = process.env.AUTH_REFRESH_COOKIE_NAME ?? 'refresh_token';
+    res.cookie(cookieName, refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/v1/auth',
+    });
+
+    const redirectBase = process.env.FRONTEND_URL ?? 'http://localhost:5173';
+    const redirectUrl = `${redirectBase}/oauth/callback#access_token=${encodeURIComponent(accessToken)}`;
+    return res.redirect(redirectUrl);
   }
 }
