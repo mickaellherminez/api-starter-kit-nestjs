@@ -7,6 +7,12 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 
+type RefreshTokenPayload = {
+  sub: string;
+  email?: string;
+  jti: string;
+};
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -50,42 +56,7 @@ export class AuthService {
   }
 
   async refresh(refreshToken: string) {
-    const secret = process.env.JWT_REFRESH_SECRET ?? 'dev-refresh-secret';
-    let payload: unknown;
-    try {
-      payload = await this.jwt.verifyAsync(refreshToken, { secret });
-    } catch {
-      throw new UnauthorizedException('Invalid refresh token');
-    }
-
-    if (!payload || typeof payload !== 'object') {
-      throw new UnauthorizedException('Invalid refresh token');
-    }
-
-    const tokenPayload = payload as { sub?: string; email?: string; jti?: string };
-    if (!tokenPayload.sub || !tokenPayload.jti) {
-      throw new UnauthorizedException('Invalid refresh token');
-    }
-
-    const stored = await this.prisma.refreshToken.findUnique({
-      where: { id: tokenPayload.jti },
-    });
-    if (!stored || stored.revokedAt) {
-      throw new UnauthorizedException('Invalid refresh token');
-    }
-
-    if (stored.expiresAt <= new Date()) {
-      throw new UnauthorizedException('Invalid refresh token');
-    }
-
-    const matches = await argon2.verify(stored.tokenHash, refreshToken);
-    if (!matches) {
-      throw new UnauthorizedException('Invalid refresh token');
-    }
-
-    if (stored.userId !== tokenPayload.sub) {
-      throw new UnauthorizedException('Invalid refresh token');
-    }
+    const { tokenPayload, stored } = await this.validateRefreshToken(refreshToken);
 
     await this.prisma.refreshToken.update({
       where: { id: stored.id },
@@ -98,6 +69,15 @@ export class AuthService {
         : await this.getUserEmail(tokenPayload.sub);
 
     return this.issueTokens(tokenPayload.sub, email);
+  }
+
+  async logout(refreshToken: string) {
+    const { stored } = await this.validateRefreshToken(refreshToken);
+    await this.prisma.refreshToken.update({
+      where: { id: stored.id },
+      data: { revokedAt: new Date() },
+    });
+    return { success: true };
   }
 
   private async issueTokens(userId: string, email: string) {
@@ -150,5 +130,49 @@ export class AuthService {
       throw new UnauthorizedException('Invalid refresh token');
     }
     return user.email;
+  }
+
+  private async validateRefreshToken(refreshToken: string) {
+    const secret = process.env.JWT_REFRESH_SECRET ?? 'dev-refresh-secret';
+    let payload: unknown;
+    try {
+      payload = await this.jwt.verifyAsync(refreshToken, { secret });
+    } catch {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    if (!payload || typeof payload !== 'object') {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    const tokenPayload = payload as Partial<RefreshTokenPayload>;
+    if (!tokenPayload.sub || !tokenPayload.jti) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    const stored = await this.prisma.refreshToken.findUnique({
+      where: { id: tokenPayload.jti },
+    });
+    if (!stored || stored.revokedAt) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    if (stored.expiresAt <= new Date()) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    const matches = await argon2.verify(stored.tokenHash, refreshToken);
+    if (!matches) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    if (stored.userId !== tokenPayload.sub) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    return {
+      tokenPayload: tokenPayload as RefreshTokenPayload,
+      stored,
+    };
   }
 }

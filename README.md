@@ -90,6 +90,11 @@ curl -i -X POST http://localhost:3000/v1/auth/login \
 curl -i -X POST http://localhost:3000/v1/auth/refresh \
   -H "Content-Type: application/json" \
   -d '{"refreshToken":"your-refresh-token"}'
+
+# auth logout
+curl -i -X POST http://localhost:3000/v1/auth/logout \
+  -H "Content-Type: application/json" \
+  -d '{"refreshToken":"your-refresh-token"}'
 ```
 
 ## Auth
@@ -150,6 +155,24 @@ Response:
 {
   "accessToken": "new-jwt-access-token",
   "refreshToken": "new-jwt-refresh-token"
+}
+```
+
+### Logout
+
+Request:
+
+```json
+{
+  "refreshToken": "jwt-refresh-token"
+}
+```
+
+Response:
+
+```json
+{
+  "success": true
 }
 ```
 
